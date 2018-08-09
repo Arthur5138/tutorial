@@ -11,6 +11,7 @@ class UsersController < ApplicationController
     #@user = User.new(params[:user]) userオブジェクトにuserのパラムス全部を渡すのは危険,admin属性を入れられる危険性
     @user = User.new(user_params)
     if @user.save
+      log_in @user #Sessionヘルパーのlog_inメソッドを使用。ユーザー登録後に自動でログインできるようにしている
       flash[:success] = "Welcome to the Sample App!"
       redirect_to @user
     else
