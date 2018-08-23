@@ -1,6 +1,7 @@
 class SessionsController < ApplicationController
   
   def new
+
   end
   
   def create
@@ -8,8 +9,9 @@ class SessionsController < ApplicationController
     if @user && @user.authenticate(params[:session][:password]) #1個目のuserでuserが存在しつつ、かつパスワードの真偽値がtrueならuserを返す
     log_in @user #sessionsHelperのログインメソッドにuserを渡してログインしている。
     #remember user #sessions_helperに定義されてるrememberメソッド。remember_digestに記憶トークンを保存する。
-    params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
-    redirect_to @user #userと書いてuser_url(user)を自動変換してくれてる。
+    params[:session][:remember_me] == '1' ? remember(@user) : forget(@user) #チュートの9.23参照
+    #redirect_to @user #userと書いてuser_url(user)を自動変換してくれてる。
+    redirect_back_or @user #URLのリクエストがあればその、URLへ、なければ@userへリダイレクト
     else
       flash.now[:danger] = 'Invalid email/password combination'
       render 'new'
