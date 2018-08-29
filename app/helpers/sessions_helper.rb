@@ -23,10 +23,10 @@ module SessionsHelper
       @current_user ||= User.find_by(id: user_id) #@current_userがない場合、上記idでuser.find_byをしてuserを取得
     elsif (user_id = cookies.signed[:user_id]) #または、cookies.signed[:user_id]で復号化
       user = User.find_by(id: user_id)
-      if user && user.authenticated?(cookies[:remember_token]) #userモデルに定義したauthenticated?でremember_digestとcookies[:remember_token]を照合してtrueならuserを返す
+       if user && user.authenticated?(:remember, cookies[:remember_token]) #userモデルに定義したauthenticated?でremember_digestとcookies[:remember_token]を照合してtrueならuserを返す
         log_in user
         @current_user = user
-      end
+       end
     end
   end
   
