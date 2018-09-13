@@ -15,6 +15,7 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     redirect_to root_url and return unless @user.activated? #activateがtrue出ない場合はrootにダイレクト
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
   
   def create
@@ -57,14 +58,6 @@ class UsersController < ApplicationController
   
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation) #渡される属性を制限する。
-  end
-  
-  def logged_in_user 
-    unless logged_in? #セッションヘルパー
-     store_location #sessionヘルパーから。リクエストしたURLを記憶して:fowarding_urlに保存
-     flash[:danger] = "Please log in"
-     redirect_to login_url
-    end
   end
   
   def correct_user #正しいユーザーかどうか確認

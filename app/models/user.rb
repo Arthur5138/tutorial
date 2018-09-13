@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_many :microposts, dependent: :destroy
   attr_accessor :remember_token, :activation_token, :reset_token #has_secure_passwordの時は仮想のpassword属性ができたが、今回は自分で仮想属性を作成する必要がある
   #before_save { self.email = self.email.downcase } #セーブをする前に小文字にする。右selfは現在のユーザーを指す。
   before_save :downcase_email
@@ -66,6 +67,12 @@ class User < ApplicationRecord
    
    def password_reset_expired?  # パスワード再設定の期限が切れている場合はtrueを返す
      reset_sent_at < 2.hours.ago
+   end
+   
+   #マイクロポストのfeed用のメソッド
+   
+   def feed
+     Micropost.where("user_id = ?", id)
    end
    
    private
