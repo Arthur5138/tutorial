@@ -1,5 +1,13 @@
 class User < ApplicationRecord
   has_many :microposts, dependent: :destroy
+  
+  has_many :active_relationships, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
+  # 上記active_relationshipモデルは無いので、class_name：で明示的に探して欲しいモデルのクラス名を表記する今回の場合Relationshipモデルは存在する
+  has_many :following, through: :active_relationships, source: :followed
+  
+  
+  has_many :passive_relationships, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
+  has_many :followers, through: :passive_relationships, source: :follower
   attr_accessor :remember_token, :activation_token, :reset_token #has_secure_passwordの時は仮想のpassword属性ができたが、今回は自分で仮想属性を作成する必要がある
   #before_save { self.email = self.email.downcase } #セーブをする前に小文字にする。右selfは現在のユーザーを指す。
   before_save :downcase_email
@@ -71,9 +79,36 @@ class User < ApplicationRecord
    
    #マイクロポストのfeed用のメソッド
    
-   def feed
-     Micropost.where("user_id = ?", id)
+   #def feed
+     #Micropost.where("user_id = ?", id)
+   #end
+   
+   #ユーザーをフォローする
+   def follow(other_user)
+     following << other_user #followingでフォローしている集合体をgetして other_userを配列の最後に追加している。
    end
+   
+   #ユーザーのステータスフィードを返す
+   #def feed
+     #Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id)
+   #end
+   
+   def feed
+     following_ids = "SELECT followed_id FROM relationships
+                       WHERE follower_id = :user_id"
+     Micropost.where("user_id IN (#{following_ids}) OR user_id = :user_id", user_id: id)
+   end
+   
+   #ユーザーをフォロー解除している
+   def unfollow(other_user)
+     active_relationships.find_by(followed_id: other_user.id).destroy
+   end
+   
+   #現在のユーザーがフォローしてたらTRUEを返す
+   def following?(other_user)
+     following.include?(other_user)
+   end
+
    
    private
    
